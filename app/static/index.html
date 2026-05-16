@@ -8,6 +8,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -297,19 +298,63 @@
                 </div>
 
                 <!-- Input Area -->
-                <div class="p-4 md:p-6 bg-slate-950/80 backdrop-blur-md">
-                <div class="max-w-4xl mx-auto relative group">
-                    <textarea x-model="messageInput" @keydown.enter="handleEnterKey($event)" class="w-full bg-slate-900/50 border border-slate-800 rounded-2xl px-5 py-4 pr-16 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition custom-scroll resize-none" placeholder="输入你的问题... (Enter 发送, Ctrl+Enter 换行)" rows="2"></textarea>
-                    <button @click="sendMessage()" :disabled="!messageInput.trim() || streaming" class="absolute right-3 bottom-3 p-3 bg-brand-600 hover:bg-brand-500 disabled:opacity-30 disabled:hover:bg-brand-600 text-white rounded-xl shadow-lg transition">
-                        <i data-lucide="send" class="w-5 h-5"></i>
-                    </button>
-                </div>
-                    <p class="text-center text-[10px] text-slate-600 mt-3 font-medium">AI 视角仅供决策参考 · 对话消耗 ¥0.05</p>
+                <div class="p-4 md:p-6 bg-slate-950/80 backdrop-blur-md border-t border-slate-800/50">
+
+                    <!-- 录音状态提示条 -->
+                    <div x-show="isRecording" x-transition class="max-w-4xl mx-auto mb-3 flex items-center gap-3 px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/30">
+                        <span class="mic-recording-dot"></span>
+                        <span class="text-red-400 text-sm font-medium">正在录音，再次点击麦克风停止...</span>
+                        <span class="ml-auto text-red-400 text-xs font-mono" x-text="recordingTimer"></span>
+                    </div>
+
+                    <div class="max-w-4xl mx-auto flex items-end gap-3">
+
+                        <!-- 麦克风按钮 -->
+                        <button
+                            @click="toggleRecording()"
+                            :class="isRecording
+                                ? 'bg-red-600 hover:bg-red-500 shadow-red-600/40 mic-btn-active'
+                                : 'bg-slate-800 hover:bg-slate-700'"
+                            :disabled="streaming"
+                            class="flex-shrink-0 p-3.5 rounded-xl text-white shadow-lg transition-all duration-200 disabled:opacity-30"
+                            title="点击开始录音，再次点击停止"
+                        >
+                            <i :data-lucide="isRecording ? 'mic-off' : 'mic'" class="w-5 h-5"></i>
+                        </button>
+
+                        <!-- 文字输入区域 -->
+                        <div class="flex-grow relative">
+                            <textarea
+                                x-model="messageInput"
+                                @keydown.enter="handleEnterKey($event)"
+                                :disabled="isRecording"
+                                :placeholder="isRecording ? '🎤 录音中，请说话...' : '输入你的问题... (Enter 发送, Ctrl+Enter 换行)'"
+                                class="w-full bg-slate-900/50 border border-slate-800 rounded-2xl px-5 py-4 pr-14 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition custom-scroll resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+                                rows="2"
+                            ></textarea>
+                            <!-- 发送按钮 -->
+                            <button
+                                @click="sendMessage()"
+                                :disabled="(!messageInput.trim() && !isRecording) || streaming"
+                                class="absolute right-3 bottom-3 p-2.5 bg-brand-600 hover:bg-brand-500 disabled:opacity-30 text-white rounded-xl shadow-lg transition"
+                            >
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
+                    </div>
+                    <p class="text-center text-[10px] text-slate-600 mt-3 font-medium">AI 视角仅供决策参考 · 对话消耗 ¥0.05 · 语音输入由 Whisper 极速转录</p>
                 </div>
             </div>
         </main>
     </div>
 
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/personas.js"></script>
+    <script src="js/conversations.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/recorder.js"></script>
     <script src="app.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
