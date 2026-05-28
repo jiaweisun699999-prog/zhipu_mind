@@ -1,4 +1,3 @@
-<div align="center">
 
 # MindMatrix 智谱矩阵 (hu-chenfeng.skill v2.0)
 
@@ -29,9 +28,10 @@
 * **语音合成 (TTS) 与识别 (ASR)**：深度集成 MiniMax 拟真声音克隆与 Groq Whisper 语音流。
 * **个人账户与充值**：完善的额度计费、邀请码注册与余额管理。
 
-<div align="center">
-  <img width="50%" alt="MindMatrix Chat Interface" src="https://github.com/user-attachments/assets/c15cf1ef-b188-4a21-bc2f-7a3ee8cdab3e" />
-</div>
+<img width="2559" height="1319" alt="image" src="https://github.com/user-attachments/assets/d97708cc-61a1-43cd-b293-23b3ab81ef2d" />
+<img width="2559" height="1319" alt="image" src="https://github.com/user-attachments/assets/cd659feb-ec72-4ef1-b2ab-51660fccbb81" />
+<img width="2559" height="1319" alt="image" src="https://github.com/user-attachments/assets/6e1bc4be-3d1e-45ae-a7ef-417adba25a01" />
+<img width="2559" height="1319" alt="image" src="https://github.com/user-attachments/assets/77887b8f-d30e-4c0c-b67a-704cba6c3443" />
 
 ---
 
@@ -40,7 +40,6 @@
 ### 1. 离线向量库整合 (免网打包上传 Git)
 
 为了解决云端部署或离线环境下因网络无法拉取模型的问题，项目实现了 **bge-small 向量模型本地闭环整合**：
-* **模型集成**：已将 `BAAI/bge-small-zh-v1.5` 的所有 ONNX 权重 and Tokenizer 文件（`fast-bge-small-zh-v1.5.tar.gz` 约 54MB）打包置于项目根目录中。
 * **一键提取**：解压至项目根目录的 `models/` 文件夹下即可运行。
 * **离线无网依赖**：在 `app/rag.py` 等加载模块中，通过指定 `cache_dir` 或 `FASTEMBED_CACHE_PATH` 环境变量指向本地 `models/`，系统将**完全停止**向 Hugging Face 或公网下载模型，彻底消除网络堵塞风险，打包成 Zip/Tar 极速分发与部署。
 
@@ -57,7 +56,7 @@
 
 系统采用 SQLite 作为轻量化持久介质，包含四张核心表：
 
-```mermaid
+```bash
 erDiagram
     users {
         int id PK
