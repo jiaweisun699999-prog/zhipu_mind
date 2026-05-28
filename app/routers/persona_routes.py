@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from app.rag import AVAILABLE_PERSONAS
+from app.tts import is_voice_supported
 
 router = APIRouter(prefix="/api", tags=["Personas"])
 
@@ -11,6 +12,7 @@ def list_personas():
             "id":          p["id"],
             "name":        p["name"],
             "description": p["description"],
+            "has_voice":   is_voice_supported(p["id"]),
         }
         for p in AVAILABLE_PERSONAS.values()
     ]

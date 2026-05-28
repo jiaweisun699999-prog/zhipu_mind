@@ -77,6 +77,7 @@ def get_messages(
             "id":         m.id,
             "role":       m.role,
             "content":    m.content,
+            "audio_url":  getattr(m, "audio_url", None),
             "created_at": m.created_at.isoformat(),
         }
         for m in conv.messages

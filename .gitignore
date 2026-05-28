@@ -32,13 +32,24 @@ Desktop.ini
 .env.*
 !.env.example
 
-# 服务端聊天日志
+# 服务端聊天日志与临时文件
 logs/
 *.log
-
-# 打包文件与大模型文件
-fast-bge-small-zh-v1.5.tar.gz
-
-# Uvicorn / cpolar 后台输出
 web.log
 cpolar.log
+
+# 本地 SQLite 数据库 (包含用户隐私、账户、密码及邀请码，不可上传)
+data/*.db
+data/app.db
+data/chat.db
+data/core.db
+
+# 打包大模型文件与本地提取目录
+fast-bge-small-zh-v1.5.tar.gz
+models/
+
+# 生成的 TTS 临时语音缓存与本地测试音频
+app/static/audio/*
+!app/static/audio/.gitkeep
+*.mp3
+

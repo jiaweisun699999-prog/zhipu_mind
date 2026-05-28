@@ -84,6 +84,7 @@ class Message(Base):
     conversation_id = Column(Integer, ForeignKey("conversations.id"), nullable=False, index=True)
     role            = Column(Enum("user", "assistant", name="role_enum"), nullable=False)
     content         = Column(Text, nullable=False)
+    audio_url       = Column(String(512), nullable=True)  # ★ 新增：记录这句回复绑定的语音文件路径
     created_at      = Column(DateTime, nullable=False, default=datetime.utcnow)
 
     # 关联关系
@@ -114,8 +115,7 @@ def init_db():
     """创建所有尚不存在的表。安全：已存在的表不会被覆盖。"""
     Base.metadata.create_all(bind=engine)
 
-    # ── 迁移兜底：为旧库中已存在的 conversations 表补充 persona_id 列 ──────
-    # （使用原生 SQL 执行，避免 ALTER TABLE 在已有列时报错）
+    # ── 迁移兜底：为旧库补充新列 ──────
     from sqlalchemy import text
     with engine.connect() as conn:
         try:
@@ -124,5 +124,13 @@ def init_db():
             ))
             conn.commit()
         except Exception:
-            # 列已存在 → 忽略（SQLite 会抛 OperationalError: duplicate column name）
             pass
+
+        try:
+            conn.execute(text(
+                "ALTER TABLE messages ADD COLUMN audio_url VARCHAR(512)"
+            ))
+            conn.commit()
+        except Exception:
+            pass
+

@@ -45,7 +45,28 @@ function authModule() {
                     body: JSON.stringify(this.authForm)
                 });
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.detail || '认证失败');
+                if (!res.ok) {
+                    let errMsg = data.detail || '认证失败';
+                    if (Array.isArray(data.detail)) {
+                        const fieldMap = { 'username': '用户名', 'password': '密码', 'invite_code': '邀请码' };
+                        errMsg = data.detail.map(err => {
+                            const field = err.loc[err.loc.length - 1];
+                            const fieldName = fieldMap[field] || field;
+                            let msg = err.msg;
+                            if (msg.includes('at least')) {
+                                const min = msg.match(/at least (\d+)/)?.[1] || '';
+                                msg = `长度不能少于 ${min} 个字符`;
+                            } else if (msg.includes('at most')) {
+                                const max = msg.match(/at most (\d+)/)?.[1] || '';
+                                msg = `长度不能超过 ${max} 个字符`;
+                            } else if (msg.includes('field required')) {
+                                msg = `不能为空`;
+                            }
+                            return `• ${fieldName}：${msg}`;
+                        }).join('\n');
+                    }
+                    throw new Error(errMsg);
+                }
 
                 if (this.authMode === 'register') {
                     this.authMode = 'login';

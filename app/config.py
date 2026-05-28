@@ -6,6 +6,7 @@ MindMatrix —— 全局配置模块
 import os
 import decimal
 import logging
+import datetime
 from pathlib import Path
 from logging.handlers import RotatingFileHandler
 
@@ -28,10 +29,25 @@ AUDIO_DIR.mkdir(parents=True, exist_ok=True)
 _log_dir = ROOT_DIR / "logs"
 _log_dir.mkdir(exist_ok=True)
 
-_handler = RotatingFileHandler(
-    _log_dir / "chat.log", maxBytes=2 * 1024 * 1024, backupCount=1000, encoding="utf-8"
+class SizeDateRotatingFileHandler(RotatingFileHandler):
+    """自定义日志滚动：当达到指定大小后，以当前时间重命名归档，并创建新文件。"""
+    def doRollover(self):
+        if self.stream:
+            self.stream.close()
+            self.stream = None
+        # 使用当前时间作为后缀
+        time_str = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        dfn = f"{self.baseFilename}.{time_str}"
+        if os.path.exists(dfn):
+            os.remove(dfn)
+        self.rotate(self.baseFilename, dfn)
+        if not self.delay:
+            self.stream = self._open()
+
+_handler = SizeDateRotatingFileHandler(
+    _log_dir / "chat.log", maxBytes=2 * 1024 * 1024, backupCount=100, encoding="utf-8"
 )
-_handler.setFormatter(logging.Formatter("%(asctime)s | %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
+_handler.setFormatter(logging.Formatter("%(asctime)s | [%(levelname)s] | %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
 logger = logging.getLogger("chat_logger")
 logger.setLevel(logging.INFO)
 if not logger.handlers:
@@ -40,7 +56,7 @@ if not logger.handlers:
 # ── LLM 客户端 ────────────────────────────────────────────────────────────────
 llm_client = AsyncOpenAI(
     base_url=os.getenv("OLLAMA_BASE_URL", "https://api.deepseek.com/v1"),
-    api_key=os.getenv("DEEPSEEK_API_KEY", "sk-89c410a7dd2e4f85a53420f00b1938c6"),
+    api_key=os.getenv("DEEPSEEK_API_KEY", ""),
 )
 MODEL_NAME = os.getenv("LLM_MODEL_NAME", "deepseek-v4-pro")
 
@@ -53,9 +69,13 @@ MINIMAX_GROUP_ID = os.getenv("MINIMAX_GROUP_ID", "1")
 FENG_GE_VOICE_ID = os.getenv("FENG_GE_VOICE_ID", "male-qn-qingse")
 
 # ── 计费常量 ──────────────────────────────────────────────────────────────────
-COST_PER_CHAT = decimal.Decimal("0.05")
-MIN_BALANCE   = decimal.Decimal("0.05")
-MAX_MSG_LEN   = 1000
+COST_TEXT_CHAT  = decimal.Decimal("0.20")  # 普通文字聊天单次扣费
+COST_VOICE_CHAT = decimal.Decimal("0.60")  # 语音聊天单次扣费
+MIN_BALANCE     = decimal.Decimal("0.20")  # 最小余额限制
+MAX_MSG_LEN     = 1000
 
 # ── 管理员密钥 ────────────────────────────────────────────────────────────────
-ADMIN_SECRET = os.getenv("ADMIN_SECRET", "CHANGE_ME_ADMIN_SECRET")
+ADMIN_SECRET = os.getenv("ADMIN_SECRET")
+if not ADMIN_SECRET:
+    logger.warning("警告: 未设置 ADMIN_SECRET 环境变量！将影响邀请码的生成。")
+    # raise ValueError("请在 .env 中设置 ADMIN_SECRET！")

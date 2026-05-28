@@ -15,7 +15,9 @@ from app.models import User, get_db
 
 # ── 配置 ──────────────────────────────────────────────────────────────────────
 # 生产环境务必在 .env 中设置强随机密钥：openssl rand -hex 32
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "CHANGE_ME_IN_PRODUCTION_USE_OPENSSL_RAND_HEX_32")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+if not SECRET_KEY:
+    raise ValueError("严重错误: 环境变量 JWT_SECRET_KEY 未配置！为了安全，系统拒绝启动。请在 .env 中设置强随机密钥 (openssl rand -hex 32)。")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES", "10080"))  # 默认 7 天
 

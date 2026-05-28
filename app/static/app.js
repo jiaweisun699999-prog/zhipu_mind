@@ -13,7 +13,6 @@ function app() {
         ...personasModule(),    // 角色数据
         ...conversationsModule(), // 会话管理
         ...chatModule(),        // 消息收发
-        ...recorderModule(),    // 录音逻辑
 
         // ── 初始化 ────────────────────────────────────────────────────────
         init() {
